@@ -49,11 +49,41 @@ class FoundItemAdmin(admin.ModelAdmin):
     custom_claim_button_field.short_description = "Claim Item"
     custom_claim_button_field.allow_tags = True
 
-    list_display = ['name', 'description', 'image_viewer_function', 'location', 'item_category',
-                    'custom_claim_button_field']
+    list_display = ['name', 'description', 'image_viewer_function', 'location', 'founded_by',
+                    'item_category', 'custom_claim_button_field']
     search_fields = ['name', 'description']
 
     actions = [insert_user_claim_item]
 
+    def get_list_display(self, request):
+        if request.user.is_superuser:
+            return self.list_display
+        else:
+            return [field for field in self.list_display if field != 'founded_by']
+
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+        if obj.post_anonymous:
+            return (
+                (None, {'fields': (
+                    'name', 'description', 'image', 'location', 'time', 'item_category', 'claimed_by',
+                    'found_by_name_or_anonymous', 'claimed_date',
+                    'post_anonymous')}),
+            )
+        else:
+            return (
+                (None, {'fields': (
+                    'name', 'description', 'image', 'location', 'time', 'item_category', 'founded_by',
+                    'claimed_by', 'claimed_date', 'post_anonymous')}),
+            )
+
+    def found_by_name_or_anonymous(self, obj):
+        if obj.post_anonymous:
+            return "Anonymous User"
+        else:
+            return obj.founded_by.username
+
+    found_by_name_or_anonymous.short_description = 'Found By'
 
 admin.site.register(FoundItem, FoundItemAdmin)
