@@ -1,0 +1,52 @@
+{% extends "layouts/base.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }}
+    delete-confirmation{% endblock %}
+
+
+{% block content %}
+
+    <div id="content content-main">
+    <div class="custom-view">
+        <h1>My Custom For Claim Item Detail View</h1>
+        <dl>
+            <dt>Name:</dt>
+            <dd>{{ found_item_obj.name }}</dd>
+            <dt>Description:</dt>
+            <dd>{{ found_item_obj.description }}</dd>
+            <dt>Location:</dt>
+            <dd>{{ found_item_obj.location }}</dd>
+            <dt>Time:</dt>
+            <dd>{{ found_item_obj.time }}</dd>
+            <dt>Item Category:</dt>
+            <dd>{{ found_item_obj.item_category }}</dd>
+            <dt>Image:</dt>
+            <dd><img src="{{ found_item_obj.image }}" alt="Test"/></dd>
+        </dl>
+    </div>
+
+    <p>{% blocktranslate with escaped_object=object %}
+        Are you sure you want to claim this item? We would ask you to upload relevant proof related doc in
+        future:{% endblocktranslate %}
+    </p>
+    <a href="{{ create_url }}" class="btn btn-lg btn-primary button toplinks"
+       target="_self"> {% translate 'Yes, I’m sure' %}</a>
+    <a href="{{ back_url }}"
+       class="button btn btn-lg btn-warning">{% translate "No, take me back" %}</a>
+{% endblock %}
+
+{% block submit-row %}
+    <div class="submit-row">
+        <button type="button" class="btn btn-primary">Custom Button</button>
+    </div>
+{% endblock %}

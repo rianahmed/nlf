@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }}
+    delete-confirmation{% endblock %}
+
+
+{% block content %}
+
+    <div id="row">
+    <div class="col-12 mb-4  mt-4">
+        <div class="card border-0 shadow components-section">
+            <div class="card-header card-text fw-bolder">Update Claim Status</div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="mb-4">
+                        <label for="email">Claimed By</label>
+                        <input type="email" readonly class="form-control"
+                               id="email" value="{{ claim_item_obj.claimed_by }}"
+                               aria-describedby="emailHelp">
+                        <small id="emailHelp" class="form-text text-muted">This Item is Claimed
+                            By {{ claim_item_obj.claimed_by }}</small>
+                    </div>
+                    <div class="my-4">
+                        <label for="textarea">Claim Description</label>
+                        <textarea readonly class="form-control" placeholder="{{ claim_item_obj.description }}"
+                                  id="textarea" rows="4"></textarea>
+                    </div>
+                    <div class="my-4">
+                        <label for="attachment">Attachment as Proof</label>
+                        <br/>
+                        <a class="btn btn-behance" id="attachment" href="{{ claim_item_obj.attachment }}">View
+                            Attachment</a>
+                    </div>
+                    <div class="mb-4">
+                        <label class="my-1 me-2" for="country">Claim Status</label>
+                        <select class="form-select"
+                                id="claim_status"
+                                aria-label="Default select example">
+                            <option selected="selected">Select Status</option>
+                            {% for status_value, status_text in all_claim_status %}
+                                {% if claim_item_obj.status == status_value %}
+                                    <option value="{{ status_value }}" selected>{{ status_text }}</option>
+                                {% else %}
+                                    <option value="{{ status_value }}">{{ status_text }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ submit_url }}" class="btn btn-lg btn-info"
+                   target="_self"> {% translate 'Update Status' %}</a>
+                <a href="{{ back_url }}"
+                   class="button btn btn-lg btn-warning">{% translate "No, take me back" %}</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block submit-row %}
+    <div class="submit-row">
+        <button type="button" class="btn btn-primary">Custom Button</button>
+    </div>
+{% endblock %}
