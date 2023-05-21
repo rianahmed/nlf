@@ -1,4 +1,4 @@
-{% extends 'admin/base_site.html' %}
+{% extends "layouts/base.html" %}
 {% load i18n admin_urls static %}
 
 {% block extrahead %}
@@ -39,10 +39,10 @@
         Are you sure you want to claim this item? We would ask you to upload relevant proof related doc in
         future:{% endblocktranslate %}
     </p>
-    <a href="{{ create_url }}" style="background-color: darkslateblue; padding: 1%" class="button toplinks"
+    <a href="{{ create_url }}" class="btn btn-lg btn-primary button toplinks"
        target="_self"> {% translate 'Yes, I’m sure' %}</a>
-    <a href="{{ back_url }}" style="background-color: green; padding: 1%"
-       class="button">{% translate "No, take me back" %}</a>
+    <a href="{{ back_url }}"
+       class="button btn btn-lg btn-warning">{% translate "No, take me back" %}</a>
 {% endblock %}
 
 {% block submit-row %}

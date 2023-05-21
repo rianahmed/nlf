@@ -49,11 +49,17 @@ class ReportLostItem(models.Model):
         return self.item_name
 
 
+class ClaimStatus(models.TextChoices):
+    PROCESSING = "processing", "Processing State"
+    IN_REVIEW = "in_review", "Under Review"
+    APPROVED = "approved", "Approved"
+
+
 class UserClaimItem(models.Model):
     found_item = models.ForeignKey(FoundItem, on_delete=models.RESTRICT)
     claimed_by = models.ForeignKey(get_user_model(), on_delete=models.RESTRICT, related_name="claimed_by_user")
     description = models.TextField()
     attachment = models.ImageField()
+    status = models.CharField(max_length=20, choices=ClaimStatus.choices, default=ClaimStatus.PROCESSING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-

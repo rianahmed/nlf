@@ -10,12 +10,11 @@ from lost_item_report.models import (
 )
 from django.contrib.auth.models import Permission
 
-from lost_item_report.views import found_item_claim_view
+from lost_item_report.views import found_item_claim_view, update_claim_item_status_view
 
 admin.site.register(Permission)
 admin.site.register(ItemCategory)
 admin.site.register(ReportLostItem)
-admin.site.register(UserClaimItem)
 
 
 @admin.action(description='User Claim Request Tracker')
@@ -23,7 +22,7 @@ def insert_user_claim_item(modeladmin, request, queryset):
     print(modeladmin, request, queryset)
     user_claim_item_obj = UserClaimItem()
     user_claim_item_obj.found_item = 1  # TODO: Found Item ID Here
-    user_claim_item_obj.claimed_by = 1  # TODO: User ID Here
+    user_claim_item_obj.claimed_by = request.user  # TODO: User ID Here
     user_claim_item_obj.save()
 
 
@@ -42,7 +41,7 @@ class FoundItemAdmin(admin.ModelAdmin):
 
     def custom_claim_button_field(self, obj):
         return format_html(
-            '<a class="button button-danger" href="{}">Claim</a>',
+            '<a class="btn btn-info" href="{}">Claim</a>',
             reverse('found-item-claim-url', args=[obj.pk]),
         )
 
@@ -86,4 +85,42 @@ class FoundItemAdmin(admin.ModelAdmin):
 
     found_by_name_or_anonymous.short_description = 'Found By'
 
+
+class UserClaimItemAdmin(admin.ModelAdmin):
+    list_display = ['found_item', 'description', 'status']
+    search_fields = ['status', 'description']
+    custom_approve_button_field_added = False
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if request.user.is_superuser and not self.custom_approve_button_field_added:
+            list_display.append('custom_approve_button_field')
+            self.custom_approve_button_field_added = True
+        return list_display
+
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj=obj)
+        if not request.user.is_superuser:
+            fields = [field for field in fields if field != 'status']
+        return fields
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('claim-item-status/<int:id>', update_claim_item_status_view, name='claim-item-status-url'),
+        ]
+        return custom_urls + urls
+
+    def custom_approve_button_field(self, obj):
+        return format_html(
+            '<a class="btn btn-warning" href="{}">Update Status</a>',
+            reverse('claim-item-status-url', args=[obj.pk]),
+        )
+
+    custom_approve_button_field.short_description = "Status"
+    custom_approve_button_field.allow_tags = True
+
+
+admin.site.register(UserClaimItem, UserClaimItemAdmin)
 admin.site.register(FoundItem, FoundItemAdmin)
