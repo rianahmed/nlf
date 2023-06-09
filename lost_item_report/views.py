@@ -28,3 +28,6 @@ def update_claim_item_status_view(request, id):
         "back_url": reverse("admin:lost_item_report_founditem_changelist")
     }
     return render(request, 'admin/claim_item_details.html', context)
+
+def hello(request):
+    return httpresponse("hello world")
