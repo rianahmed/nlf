@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.timezone import now
+from django.http import HttpResponseBadRequest
 
 
 # lost item names
@@ -28,9 +29,14 @@ class FoundItem(models.Model):
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(default=now)
     post_anonymous = models.BooleanField(default=False)
+    #added for Post Limit
+    post_limit=models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
+
+
+
 
 
 # A user giving ad for the item he has lost
@@ -63,3 +69,6 @@ class UserClaimItem(models.Model):
     status = models.CharField(max_length=20, choices=ClaimStatus.choices, default=ClaimStatus.PROCESSING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name='My Claim Item'
+

@@ -16,7 +16,6 @@ admin.site.register(Permission)
 admin.site.register(ItemCategory)
 admin.site.register(ReportLostItem)
 
-
 @admin.action(description='User Claim Request Tracker')
 def insert_user_claim_item(modeladmin, request, queryset):
     print(modeladmin, request, queryset)
@@ -24,7 +23,6 @@ def insert_user_claim_item(modeladmin, request, queryset):
     user_claim_item_obj.found_item = 1  # TODO: Found Item ID Here
     user_claim_item_obj.claimed_by = request.user  # TODO: User ID Here
     user_claim_item_obj.save()
-
 
 class FoundItemAdmin(admin.ModelAdmin):
     def image_viewer_function(self, single_db_obj):

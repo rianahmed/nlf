@@ -1,9 +1,9 @@
 from django.shortcuts import render
-
 # Create your views here.
 from django.urls import reverse
 
 from lost_item_report.models import FoundItem, UserClaimItem, ClaimStatus
+from django.contrib.auth.models import User, Permission
 
 
 def found_item_claim_view(request, id):
@@ -28,3 +28,17 @@ def update_claim_item_status_view(request, id):
         "back_url": reverse("admin:lost_item_report_founditem_changelist")
     }
     return render(request, 'admin/claim_item_details.html', context)
+
+
+#checking for found item count
+def add_post(request):
+    count = FoundItem.objects.count()
+    if count<=5:
+      user = User.objects.get(username='rian')
+      permission=Permission.objects.get(codename='lost_item_report | found item | Can add found item')
+      user.user_permissions.remove(permission)
+      return render(request, 'admin/text.html', {'permission': permission})
+    else:
+        user = User.objects.get(username='rian')
+
+        return render(request, 'admin/text.html', {'permission': user})
