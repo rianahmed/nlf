@@ -1,4 +1,5 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
 from django.urls import reverse, path
 from django.utils.html import format_html
 
@@ -19,8 +20,6 @@ from lost_item_report.views import (
 
 admin.site.register(Permission)
 admin.site.register(ItemCategory)
-admin.site.register(ReportLostItem)
-
 
 @admin.action(description='User Claim Request Tracker')
 def insert_user_claim_item(modeladmin, request, queryset):
@@ -29,6 +28,33 @@ def insert_user_claim_item(modeladmin, request, queryset):
     user_claim_item_obj.found_item = 1  # TODO: Found Item ID Here
     user_claim_item_obj.claimed_by = request.user  # TODO: User ID Here
     user_claim_item_obj.save()
+
+
+class ReportLostItemAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        try:
+            obj.save()
+        except ValidationError as e:
+            form.add_error(None, e)
+            messages.error(request, str(e))
+            return
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if extra_context is None:
+            extra_context = {}
+
+        if request.method == 'POST':
+            try:
+                response = super().changeform_view(request, object_id, form_url, extra_context)
+            except Exception as e:
+                extra_context['validation_error'] = str(e)
+        else:
+            response = super().changeform_view(request, object_id, form_url, extra_context)
+
+        if 'validation_error' in extra_context:
+            extra_context['errors'] = [extra_context['validation_error']]
+
+        return response
 
 
 class FoundItemAdmin(admin.ModelAdmin):
@@ -157,9 +183,15 @@ class UserClaimItemAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         self.request = request
-        obj.full_clean()  # Run model validation
-        obj.save()
+        try:
+            obj.full_clean()  # Run model validation
+            obj.save()
+        except ValidationError as e:
+            form.add_error(None, e)
+            messages.error(request, str(e))
+            return
 
 
 admin.site.register(UserClaimItem, UserClaimItemAdmin)
 admin.site.register(FoundItem, FoundItemAdmin)
+admin.site.register(ReportLostItem, ReportLostItemAdmin)
