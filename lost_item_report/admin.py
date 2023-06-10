@@ -14,6 +14,7 @@ from lost_item_report.views import (
     found_item_claim_view,
     update_claim_item_status_view,
     approve_found_item_view,
+    update_found_item_approve_item_view,
 )
 
 admin.site.register(Permission)
@@ -41,27 +42,33 @@ class FoundItemAdmin(admin.ModelAdmin):
         custom_urls = [
             path('found-item-claim/<int:id>', found_item_claim_view, name='found-item-claim-url'),
             path('approve-found-item/<int:id>', approve_found_item_view, name='approve-found-item-url'),
+            path('update-founditem-approve-status/<int:id>', update_found_item_approve_item_view, name='update-founditem-approve-url'),
         ]
         return custom_urls + urls
 
-    def custom_claim_button_field(self, obj):
-        if obj.is_admin_approved and self.request.user.is_superuser:
+    def get_form(self, request, obj=None, **kwargs):
+        self.request = request  # Store the request object
+        return super().get_form(request, obj, **kwargs)
 
+    def custom_claim_button_field(self, obj):
+        if obj.is_admin_approved:
             return format_html(
                 '<a class="btn btn-info" href="{}">Claim</a>',
                 reverse('found-item-claim-url', args=[obj.pk]),
+            )
+        return format_html(
+                '<button type="button" disabled>Not Approved</button>'
             )
 
     custom_claim_button_field.short_description = "Claim Item"
     custom_claim_button_field.allow_tags = True
 
     def custom_approve_button(self, obj):
-        if not obj.is_admin_approved:
+        if not obj.is_admin_approved and self.request.user.is_superuser:
             return format_html(
                 '<a class="btn btn-success" href="{}">Approve</a>',
                 reverse('approve-found-item-url', args=[obj.pk]),
             )
-        return ""
 
     custom_approve_button.short_description = "Approve Found Item"
     custom_approve_button.allow_tags = True
@@ -73,10 +80,12 @@ class FoundItemAdmin(admin.ModelAdmin):
     actions = [insert_user_claim_item]
 
     def get_list_display(self, request):
+        self.request = request
         if request.user.is_superuser:
             return self.list_display
         else:
-            return [field for field in self.list_display if field != 'founded_by']
+            user_excluded_list = ['founded_by', 'custom_approve_button']
+            return [field for field in self.list_display if field not in user_excluded_list]
 
     def get_fieldsets(self, request, obj=None):
         if obj is None:
