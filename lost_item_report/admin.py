@@ -49,7 +49,7 @@ class FoundItemAdmin(admin.ModelAdmin):
     custom_claim_button_field.allow_tags = True
 
     list_display = ['name', 'description', 'image_viewer_function', 'location', 'founded_by',
-                    'item_category', 'custom_claim_button_field']
+                    'item_category', 'is_admin_approved', 'custom_claim_button_field']
     search_fields = ['name', 'description']
 
     actions = [insert_user_claim_item]
@@ -67,7 +67,7 @@ class FoundItemAdmin(admin.ModelAdmin):
             return (
                 (None, {'fields': (
                     'name', 'description', 'image', 'location', 'time', 'item_category', 'claimed_by',
-                    'found_by_name_or_anonymous', 'claimed_date',
+                    'found_by_name_anonymous', 'claimed_date',
                     'post_anonymous')}),
             )
         else:
@@ -77,13 +77,13 @@ class FoundItemAdmin(admin.ModelAdmin):
                     'claimed_by', 'claimed_date', 'post_anonymous')}),
             )
 
-    def found_by_name_or_anonymous(self, obj):
+    def found_by_name_anonymous(self, obj):
         if obj.post_anonymous:
             return "Anonymous User"
         else:
             return obj.founded_by.username
 
-    found_by_name_or_anonymous.short_description = 'Found By'
+    found_by_name_anonymous.short_description = 'Found By'
 
 
 class UserClaimItemAdmin(admin.ModelAdmin):
