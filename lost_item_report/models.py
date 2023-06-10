@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.auth.middleware import get_user
 
 
 # lost item names
@@ -34,25 +33,26 @@ class FoundItem(models.Model):
     is_admin_approved = models.BooleanField(default=False, help_text="Only This field value true Found Item will be shown on frontend list")
 
     def clean(self):
-        try:
-            # Get the current user
-            user = get_user(self._state.db)
+        # try:
+        super(FoundItem, self).clean()
+        # Get the current user
+        user = self.founded_by
 
-            if isinstance(user, AnonymousUser):
-                raise ValidationError("No user found.")
+        if isinstance(user, AnonymousUser):
+            raise ValidationError("No user found.")
 
-            # Check the number of unclaimed items for the user
-            max_unclaimed_items = 5  # Set your desired limit
-            unclaimed_items_count = FoundItem.objects.filter(founded_by=user, claimed_by__isnull=True).count()
+        # Check the number of unclaimed items for the user
+        max_unclaimed_items = 5  # Set your desired limit
+        unclaimed_items_count = FoundItem.objects.filter(founded_by=user, claimed_by__isnull=True).count()
 
-            if unclaimed_items_count >= max_unclaimed_items:
-                raise ValidationError("Maximum limit reached for unclaimed items.")
-        except Exception as e:
-            raise ValidationError(f"Data Format error {e}")
+        if unclaimed_items_count >= max_unclaimed_items:
+            raise ValueError("Maximum limit reached for unclaimed items.")
+        # except Exception as e:
+        #     raise ValueError(f"Data Format error {e}")
 
-    def save_model(self, request, obj, form, change):
-        obj.full_clean()  # Run model validation
-        obj.save()
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

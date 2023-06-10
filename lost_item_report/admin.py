@@ -42,7 +42,8 @@ class FoundItemAdmin(admin.ModelAdmin):
         custom_urls = [
             path('found-item-claim/<int:id>', found_item_claim_view, name='found-item-claim-url'),
             path('approve-found-item/<int:id>', approve_found_item_view, name='approve-found-item-url'),
-            path('update-founditem-approve-status/<int:id>', update_found_item_approve_item_view, name='update-founditem-approve-url'),
+            path('update-founditem-approve-status/<int:id>', update_found_item_approve_item_view,
+                 name='update-founditem-approve-url'),
         ]
         return custom_urls + urls
 
@@ -57,8 +58,8 @@ class FoundItemAdmin(admin.ModelAdmin):
                 reverse('found-item-claim-url', args=[obj.pk]),
             )
         return format_html(
-                '<button type="button" disabled>Not Approved</button>'
-            )
+            '<button type="button" disabled>Not Approved</button>'
+        )
 
     custom_claim_button_field.short_description = "Claim Item"
     custom_claim_button_field.allow_tags = True
@@ -125,7 +126,6 @@ class UserClaimItemAdmin(admin.ModelAdmin):
             self.custom_approve_button_field_added = True
         return list_display
 
-
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj=obj)
         if not request.user.is_superuser:
@@ -147,6 +147,11 @@ class UserClaimItemAdmin(admin.ModelAdmin):
 
     custom_approve_button_field.short_description = "Status"
     custom_approve_button_field.allow_tags = True
+
+    def save_model(self, request, obj, form, change):
+        self.request = request
+        obj.full_clean()  # Run model validation
+        obj.save()
 
 
 admin.site.register(UserClaimItem, UserClaimItemAdmin)
