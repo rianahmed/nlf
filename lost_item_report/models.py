@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.middleware import get_user
 
 
 # lost item names
@@ -28,6 +31,25 @@ class FoundItem(models.Model):
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(default=now)
     post_anonymous = models.BooleanField(default=False)
+    is_admin_approved = models.BooleanField(default=False, help_text="Only This field value true Found Item will be shown on frontend list")
+
+    def clean(self):
+        # Get the current user
+        user = get_user(self._state.db)
+
+        if isinstance(user, AnonymousUser):
+            raise ValidationError("No user found.")
+
+        # Check the number of unclaimed items for the user
+        max_unclaimed_items = 5  # Set your desired limit
+        unclaimed_items_count = FoundItem.objects.filter(founded_by=user, claimed_by__isnull=True).count()
+
+        if unclaimed_items_count >= max_unclaimed_items:
+            raise ValidationError("Maximum limit reached for unclaimed items.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
