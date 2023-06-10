@@ -120,3 +120,34 @@ class UserClaimItem(models.Model):
     status = models.CharField(max_length=20, choices=ClaimStatus.choices, default=ClaimStatus.PROCESSING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        super().clean()
+
+        # validation for ReportLostItem user can post only 5 post.
+        max_count = 6  # Maximum allowed posts
+        time_period_days = 3  # Time period in days
+        current_user = self.claimed_by
+        current_time = timezone.now()
+
+        # Calculate the start time of the time period
+        start_time = current_time - timezone.timedelta(days=time_period_days)
+
+        # Count the number of items created by the user within the time period
+        current_count = UserClaimItem.objects.filter(
+            reported_by=current_user,
+            created_at__gte=start_time,
+            created_at__lte=current_time
+        ).count()
+
+        if not self.pk and current_count >= max_count:
+            raise ValueError(f"You have reached the maximum number of ({max_count}) claims within {time_period_days} days.")
+
+    def save(self, *args, **kwargs):
+        # Only for newly created objects
+        if not self.pk:
+            self.clean()
+            request = kwargs.pop('request', None)  # Retrieve the request object
+            if request and isinstance(request, HttpRequest) and request.user.is_authenticated:
+                self.claimed_by = request.user  # Set the claimed_by field to the authenticated user
+        super().save(*args, **kwargs)
