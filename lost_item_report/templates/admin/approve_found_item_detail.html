@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+`{% extends "layouts/base.html" %}
 {% load i18n admin_urls static %}
 
 {% block extrahead %}
@@ -35,9 +35,10 @@
         </dl>
     </div>
 
-    <p>{% blocktranslate with escaped_object=object %}
-        Are you sure you want to claim this item? We would ask you to upload relevant proof related doc in
-        future:{% endblocktranslate %}
+    <p>
+        {% blocktranslate with escaped_object=object %}
+            Are you sure you want to approve this item? After this operation found item will be shown in the frontend.
+        {% endblocktranslate %}
     </p>
     <a href="{{ approval_url }}" class="btn btn-lg btn-primary button toplinks"
        target="_self"> {% translate 'Yes, I’m sure' %}</a>
@@ -50,3 +51,4 @@
         <button type="button" class="btn btn-primary">Custom Button</button>
     </div>
 {% endblock %}
+`
