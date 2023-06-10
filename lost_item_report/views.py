@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.urls import reverse
@@ -21,7 +22,7 @@ def approve_found_item_view(request, id):
     found_item_obj = FoundItem.objects.get(pk=id)
     context = {
         "found_item_obj": found_item_obj,
-        "approval_url": reverse("admin:lost_item_report_userclaimitem_add"),
+        "approval_url": reverse("update-founditem-approve-url", args=[found_item_obj.pk]),
         "back_url": reverse("admin:lost_item_report_founditem_changelist")
     }
     return render(request, 'admin/approve_found_item_detail.html', context)
@@ -38,6 +39,18 @@ def update_claim_item_status_view(request, id):
         "back_url": reverse("admin:lost_item_report_founditem_changelist")
     }
     return render(request, 'admin/claim_item_details.html', context)
+
+
+def update_found_item_approve_item_view(request, id):
+    print("I am in update_found_item_approve_status_view")
+    try:
+        found_item_obj = FoundItem.objects.get(pk=id)
+        found_item_obj.is_admin_approved = True
+        found_item_obj.save()
+        return redirect('/')
+    except Exception as exception:
+        raise Http404("FoundItem Not Found")
+
 
 def hello(request):
     return httpresponse("hello world")
