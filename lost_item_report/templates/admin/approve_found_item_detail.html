@@ -40,10 +40,10 @@
             Are you sure you want to approve this item? After this operation found item will be shown in the frontend.
         {% endblocktranslate %}
     </p>
-    <a href="{{ approval_url }}" class="btn btn-lg btn-primary button toplinks"
+    <a href="{{ approval_url }}" class="btn btn-lg btn-behance toplinks"
        target="_self"> {% translate 'Yes, I’m sure' %}</a>
     <a href="{{ back_url }}"
-       class="button btn btn-lg btn-warning">{% translate "No, take me back" %}</a>
+       class="button btn btn-lg btn-danger">{% translate "No, take me back" %}</a>
 {% endblock %}
 
 {% block submit-row %}
