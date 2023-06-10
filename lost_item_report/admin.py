@@ -10,7 +10,11 @@ from lost_item_report.models import (
 )
 from django.contrib.auth.models import Permission
 
-from lost_item_report.views import found_item_claim_view, update_claim_item_status_view
+from lost_item_report.views import (
+    found_item_claim_view,
+    update_claim_item_status_view,
+    approve_found_item_view,
+)
 
 admin.site.register(Permission)
 admin.site.register(ItemCategory)
@@ -36,20 +40,34 @@ class FoundItemAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         custom_urls = [
             path('found-item-claim/<int:id>', found_item_claim_view, name='found-item-claim-url'),
+            path('approve-found-item/<int:id>', approve_found_item_view, name='approve-found-item-url'),
         ]
         return custom_urls + urls
 
     def custom_claim_button_field(self, obj):
-        return format_html(
-            '<a class="btn btn-info" href="{}">Claim</a>',
-            reverse('found-item-claim-url', args=[obj.pk]),
-        )
+        if obj.is_admin_approved and self.request.user.is_superuser:
+
+            return format_html(
+                '<a class="btn btn-info" href="{}">Claim</a>',
+                reverse('found-item-claim-url', args=[obj.pk]),
+            )
 
     custom_claim_button_field.short_description = "Claim Item"
     custom_claim_button_field.allow_tags = True
 
+    def custom_approve_button(self, obj):
+        if not obj.is_admin_approved:
+            return format_html(
+                '<a class="btn btn-success" href="{}">Approve</a>',
+                reverse('approve-found-item-url', args=[obj.pk]),
+            )
+        return ""
+
+    custom_approve_button.short_description = "Approve Found Item"
+    custom_approve_button.allow_tags = True
+
     list_display = ['name', 'description', 'image_viewer_function', 'location', 'founded_by',
-                    'item_category', 'is_admin_approved', 'custom_claim_button_field']
+                    'item_category', 'custom_claim_button_field', 'custom_approve_button']
     search_fields = ['name', 'description']
 
     actions = [insert_user_claim_item]
