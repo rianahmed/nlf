@@ -17,6 +17,16 @@ def found_item_claim_view(request, id):
     return render(request, 'admin/my_model_detail.html', context)
 
 
+def approve_found_item_view(request, id):
+    found_item_obj = FoundItem.objects.get(pk=id)
+    context = {
+        "found_item_obj": found_item_obj,
+        "approval_url": reverse("admin:lost_item_report_userclaimitem_add"),
+        "back_url": reverse("admin:lost_item_report_founditem_changelist")
+    }
+    return render(request, 'admin/approve_found_item_detail.html', context)
+
+
 def update_claim_item_status_view(request, id):
     print("I am in update_claim_item_status_view")
     all_claim_status = ClaimStatus.choices
