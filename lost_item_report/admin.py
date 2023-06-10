@@ -32,6 +32,13 @@ def insert_user_claim_item(modeladmin, request, queryset):
 
 
 class FoundItemAdmin(admin.ModelAdmin):
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(is_admin_approved=True)
+        return qs
+
     def image_viewer_function(self, single_db_obj):
         return format_html(f'<img src="{single_db_obj.image}" width="auto" height="200px" />')
 
