@@ -45,13 +45,14 @@ class FoundItem(models.Model):
         max_unclaimed_items = 5  # Set your desired limit
         unclaimed_items_count = FoundItem.objects.filter(founded_by=user, claimed_by__isnull=True).count()
 
-        if unclaimed_items_count >= max_unclaimed_items:
+        if not self.pk and unclaimed_items_count >= max_unclaimed_items:
             raise ValueError("Maximum limit reached for unclaimed items.")
         # except Exception as e:
         #     raise ValueError(f"Data Format error {e}")
 
     def save(self, *args, **kwargs):
-        self.clean()
+        if not self.pk:  # Only for newly created objects
+            self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -72,6 +73,22 @@ class ReportLostItem(models.Model):
 
     def __str__(self):
         return self.item_name
+
+    def clean(self):
+        super().clean()
+
+        reporter_phone = self.reporter_phone
+        if 8 <= len(reporter_phone) <= 14:
+            # validation for ReportLostItem user can post only 5 post.
+            max_count = 5  # Maximum allowed posts
+            current_count = ReportLostItem.objects.filter(reporter_phone=reporter_phone).count()
+
+            if not self.pk and current_count >= max_count:
+                raise ValueError("You have reached the maximum number of posts.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class ClaimStatus(models.TextChoices):
