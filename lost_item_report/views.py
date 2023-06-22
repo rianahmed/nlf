@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.http import Http404,HttpResponse
+from django.shortcuts import render, redirect
+
+
 # Create your views here.
 from django.urls import reverse
 
 from lost_item_report.models import FoundItem, UserClaimItem, ClaimStatus
-from django.contrib.auth.models import User, Permission
 
 
 def found_item_claim_view(request, id):
@@ -15,6 +17,16 @@ def found_item_claim_view(request, id):
         "back_url": reverse("admin:lost_item_report_founditem_changelist")
     }
     return render(request, 'admin/my_model_detail.html', context)
+
+
+def approve_found_item_view(request, id):
+    found_item_obj = FoundItem.objects.get(pk=id)
+    context = {
+        "found_item_obj": found_item_obj,
+        "approval_url": reverse("update-founditem-approve-url", args=[found_item_obj.pk]),
+        "back_url": reverse("admin:lost_item_report_founditem_changelist")
+    }
+    return render(request, 'admin/approve_found_item_detail.html', context)
 
 
 def update_claim_item_status_view(request, id):
@@ -30,15 +42,16 @@ def update_claim_item_status_view(request, id):
     return render(request, 'admin/claim_item_details.html', context)
 
 
-#checking for found item count
-def add_post(request):
-    count = FoundItem.objects.count()
-    if count<=5:
-      user = User.objects.get(username='rian')
-      permission=Permission.objects.get(codename='lost_item_report | found item | Can add found item')
-      user.user_permissions.remove(permission)
-      return render(request, 'admin/text.html', {'permission': permission})
-    else:
-        user = User.objects.get(username='rian')
+def update_found_item_approve_item_view(request, id):
+    print("I am in update_found_item_approve_status_view")
+    try:
+        found_item_obj = FoundItem.objects.get(pk=id)
+        found_item_obj.is_admin_approved = True
+        found_item_obj.save()
+        return redirect('/')
+    except Exception as exception:
+        raise Http404("FoundItem Not Found")
 
-        return render(request, 'admin/text.html', {'permission': user})
+
+def hello(request):
+    return httpresponse("hello world")

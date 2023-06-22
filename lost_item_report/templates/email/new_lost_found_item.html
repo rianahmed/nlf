@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Lost Item Reported</title>
+    <style>
+        /* Base styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #444444;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: normal;
+            margin-top: 0;
+        }
+
+        p {
+            margin-top: 0;
+        }
+
+        a {
+            color: #1f6fb2;
+            text-decoration: none;
+        }
+
+        /* Header */
+        .header {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header__logo {
+            display: block;
+            margin: 0 auto;
+            max-width: 150px;
+        }
+
+        /* Main content */
+        .content {
+            padding: 30px;
+        }
+
+        .content__message {
+            font-size: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .content__button {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #1f6fb2;
+            color: #ffffff;
+            font-size: 18px;
+            line-height: 50px;
+            text-align: center;
+            text-transform: uppercase;
+            border-radius: 5px;
+        }
+
+        .content__button:hover {
+            background-color: #155d8e;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .align_center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <img class="header__logo" src="{{ logo_url }}" alt="Logo">
+</div>
+<div class="content">
+    <h1 class="align_center">New Lost Item Reported</h1>
+    <p>Dear User,<br>
+        We wanted to inform you that a new item has been reported as lost in the {{ item_category }} category. This
+        might be of interest to you.
+    <p>Item Name: {{ item_name }}</p>
+    <p>Model Version: {{ model_version }}</p>
+    <p>Description: {{ description }}</p>
+    <p>Location: {{ location }}</p>
+    <p>Date Lost: {{ date_lost }}</p>
+
+    <p>Please log in to our platform to view the details and take any necessary actions.</p>
+
+    Thank you for your attention.
+    Best Regards,
+    {{ website_name }} Team
+</div>
+<div class="footer">
+    <p>&copy; {{ website_name }} {{ current_year }}</p>
+</div>
+</body>
+</html>
